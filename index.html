@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARP's - Elite Roblox Scripter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 2rem 0;
+            text-align: center;
+            border-bottom: 2px solid #00ff41;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0,255,65,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #00ff41;
+            text-shadow: 0 0 20px #00ff41;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: #888;
+            position: relative;
+            z-index: 2;
+        }
+
+        .nav {
+            background: rgba(0,0,0,0.9);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .nav a {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .nav a:hover {
+            border-color: #00ff41;
+            box-shadow: 0 0 10px #00ff41;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            color: #00ff41;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: #00ff41;
+            box-shadow: 0 0 10px #00ff41;
+        }
+
+        .script-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .script-card {
+            background: linear-gradient(135deg, #1a1a2e, #0f0f23);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .script-card:hover {
+            border-color: #00ff41;
+            box-shadow: 0 5px 20px rgba(0,255,65,0.3);
+            transform: translateY(-5px);
+        }
+
+        .script-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff41, transparent);
+            animation: scan 3s ease-in-out infinite;
+        }
+
+        .script-title {
+            color: #00ff41;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .script-description {
+            color: #bbb;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            overflow-x: auto;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .code-block::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .code-block::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        .code-block::-webkit-scrollbar-thumb {
+            background: #00ff41;
+            border-radius: 4px;
+        }
+
+        .keyword { color: #569cd6; }
+        .string { color: #ce9178; }
+        .comment { color: #6a9955; }
+        .function { color: #dcdcaa; }
+        .number { color: #b5cea8; }
+        .variable { color: #9cdcfe; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #1a1a2e, #0f0f23);
+            padding: 2rem;
+            text-align: center;
+            border-radius: 10px;
+            border: 1px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0,255,65,0.05) 0%, transparent 70%);
+            animation: rotate 15s linear infinite;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            color: #00ff41;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-label {
+            color: #bbb;
+            margin-top: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer {
+            background: #0a0a0a;
+            border-top: 1px solid #333;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .footer-brand {
+            color: #00ff41;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .floating-code {
+            position: fixed;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #00ff41;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.6;
+            white-space: nowrap;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes scan {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+            10%, 90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+        }
+
+        .contact-section {
+            background: linear-gradient(135deg, #1a1a2e, #0f0f23);
+            padding: 3rem;
+            border-radius: 10px;
+            border: 1px solid #333;
+            text-align: center;
+            margin: 3rem 0;
+        }
+
+        .contact-button {
+            background: linear-gradient(45deg, #00ff41, #00cc33);
+            color: #000;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 1rem;
+        }
+
+        .contact-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,255,65,0.5);
+        }
+
+        @media (max-width: 768px) {
+            .script-grid {
+                grid-template-columns: 1fr;
+            }
+            .logo {
+                font-size: 2.5rem;
+            }
+            .nav ul {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrix"></canvas>
+
+    <header class="header">
+        <h1 class="logo">ARP's</h1>
+        <p class="tagline">Elite Roblox Scripter & Game Developer</p>
+    </header>
+
+    <nav class="nav">
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#scripts">Scripts</a></li>
+            <li><a href="#stats">Stats</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <section id="stats" class="section">
+            <h2 class="section-title">Professional Stats</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Scripts Created</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">50M+</div>
+                    <div class="stat-label">Script Executions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">5+</div>
+                    <div class="stat-label">Years Experience</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">100+</div>
+                    <div class="stat-label">Happy Clients</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="scripts" class="section">
+            <h2 class="section-title">Elite Script Showcase</h2>
+            
+            <div class="script-grid">
+                <div class="script-card">
+                    <h3 class="script-title">🚀 Advanced Aimbot System</h3>
+                    <p class="script-description">Professional-grade aimbot with prediction, smoothing, and anti-detection features.</p>
+                    <div class="code-block">
+<span class="keyword">local</span> <span class="variable">Players</span> = <span class="function">game:GetService</span>(<span class="string">"Players"</span>)
+<span class="keyword">local</span> <span class="variable">RunService</span> = <span class="function">game:GetService</span>(<span class="string">"RunService"</span>)
+<span class="keyword">local</span> <span class="variable">Camera</span> = <span class="variable">workspace.CurrentCamera</span>
+<span class="keyword">local</span> <span class="variable">LocalPlayer</span> = <span class="variable">Players.LocalPlayer</span>
+
+<span class="keyword">local</span> <span class="variable">AimbotSettings</span> = {
+    <span class="variable">Enabled</span> = <span class="keyword">true</span>,
+    <span class="variable">FOV</span> = <span class="number">120</span>,
+    <span class="variable">Smoothness</span> = <span class="number">0.15</span>,
+    <span class="variable">PredictionStrength</span> = <span class="number">0.165</span>,
+    <span class="variable">TargetPart</span> = <span class="string">"Head"</span>,
+    <span class="variable">WallCheck</span> = <span class="keyword">true</span>
+}
+
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function">GetClosestPlayer</span>()
+    <span class="keyword">local</span> <span class="variable">ClosestPlayer</span> = <span class="keyword">nil</span>
+    <span class="keyword">local</span> <span class="variable">ShortestDistance</span> = <span class="variable">math.huge</span>
+    
+    <span class="keyword">for</span> <span class="variable">i</span>, <span class="variable">Player</span> <span class="keyword">in</span> <span class="function">pairs</span>(<span class="variable">Players:GetPlayers</span>()) <span class="keyword">do</span>
+        <span class="keyword">if</span> <span class="variable">Player</span> ~= <span class="variable">LocalPlayer</span> <span class="keyword">and</span> <span class="variable">Player.Character</span> <span class="keyword">and</span> <span class="variable">Player.Character:FindFirstChild</span>(<span class="variable">AimbotSettings.TargetPart</span>) <span class="keyword">then</span>
+            <span class="keyword">local</span> <span class="variable">Distance</span> = (<span class="variable">Camera.CFrame.Position</span> - <span class="variable">Player.Character</span>[<span class="variable">AimbotSettings.TargetPart</span>].<span class="variable">Position</span>).<span class="variable">Magnitude</span>
+            <span class="keyword">local</span> <span class="variable">Ray</span> = <span class="variable">Camera:ScreenPointToRay</span>(<span class="variable">Camera.ViewportSize.X</span>/<span class="number">2</span>, <span class="variable">Camera.ViewportSize.Y</span>/<span class="number">2</span>)
+            
+            <span class="keyword">if</span> <span class="variable">Distance</span> < <span class="variable">ShortestDistance</span> <span class="keyword">then</span>
+                <span class="variable">ClosestPlayer</span> = <span class="variable">Player</span>
+                <span class="variable">ShortestDistance</span> = <span class="variable">Distance</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    
+    <span class="keyword">return</span> <span class="variable">ClosestPlayer</span>
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function">PredictMovement</span>(<span class="variable">targetCharacter</span>)
+    <span class="keyword">local</span> <span class="variable">targetVelocity</span> = <span class="variable">targetCharacter.HumanoidRootPart.Velocity</span>
+    <span class="keyword">local</span> <span class="variable">prediction</span> = <span class="variable">targetVelocity</span> * <span class="variable">AimbotSettings.PredictionStrength</span>
+    <span class="keyword">return</span> <span class="variable">targetCharacter</span>[<span class="variable">AimbotSettings.TargetPart</span>].<span class="variable">Position</span> + <span class="variable">prediction</span>
+<span class="keyword">end</span>
+
+<span class="variable">RunService.Heartbeat:Connect</span>(<span class="keyword">function</span>()
+    <span class="keyword">if</span> <span class="variable">AimbotSettings.Enabled</span> <span class="keyword">then</span>
+        <span class="keyword">local</span> <span class="variable">Target</span> = <span class="function">GetClosestPlayer</span>()
+        <span class="keyword">if</span> <span class="variable">Target</span> <span class="keyword">and</span> <span class="variable">Target.Character</span> <span class="keyword">then</span>
+            <span class="keyword">local</span> <span class="variable">PredictedPosition</span> = <span class="function">PredictMovement</span>(<span class="variable">Target.Character</span>)
+            <span class="keyword">local</span> <span class="variable">CameraPosition</span> = <span class="variable">CFrame.new</span>(<span class="variable">Camera.CFrame.Position</span>, <span class="variable">PredictedPosition</span>)
+            <span class="variable">Camera.CFrame</span> = <span class="variable">Camera.CFrame:Lerp</span>(<span class="variable">CameraPosition</span>, <span class="variable">AimbotSettings.Smoothness</span>)
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>)
+                    </div>
+                </div>
+
+                <div class="script-card">
+                    <h3 class="script-title">👤 ESP System (Enhanced)</h3>
+                    <p class="script-description">Advanced ESP with health bars, distance indicators, and customizable visuals.</p>
+                    <div class="code-block">
+<span class="keyword">local</span> <span class="variable">Players</span> = <span class="function">game:GetService</span>(<span class="string">"Players"</span>)
+<span class="keyword">local</span> <span class="variable">RunService</span> = <span class="function">game:GetService</span>(<span class="string">"RunService"</span>)
+<span class="keyword">local</span> <span class="variable">Camera</span> = <span class="variable">workspace.CurrentCamera</span>
+<span class="keyword">local</span> <span class="variable">LocalPlayer</span> = <span class="variable">Players.LocalPlayer</span>
+
+<span class="keyword">local</span> <span class="variable">ESPSettings</span> = {
+    <span class="variable">Enabled</span> = <span class="keyword">true</span>,
+    <span class="variable">ShowNames</span> = <span class="keyword">true</span>,
+    <span class="variable">ShowHealth</span> = <span class="keyword">true</span>,
+    <span class="variable">ShowDistance</span> = <span class="keyword">true</span>,
+    <span class="variable">BoxOutline</span> = <span class="keyword">true</span>,
+    <span class="variable">MaxDistance</span> = <span class="number">1000</span>
+}
+
+<span class="keyword">local</span> <span class="variable">ESPObjects</span> = {}
+
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function">CreateESP</span>(<span class="variable">player</span>)
+    <span class="keyword">local</span> <span class="variable">esp</span> = {
+        <span class="variable">BoxOutline</span> = <span class="function">Drawing.new</span>(<span class="string">"Square"</span>),
+        <span class="variable">Box</span> = <span class="function">Drawing.new</span>(<span class="string">"Square"</span>),
+        <span class="variable">NameTag</span> = <span class="function">Drawing.new</span>(<span class="string">"Text"</span>),
+        <span class="variable">HealthBar</span> = <span class="function">Drawing.new</span>(<span class="string">"Square"</span>),
+        <span class="variable">HealthBarOutline</span> = <span class="function">Drawing.new</span>(<span class="string">"Square"</span>),
+        <span class="variable">DistanceTag</span> = <span class="function">Drawing.new</span>(<span class="string">"Text"</span>)
+    }
+    
+    <span class="comment">-- Box styling</span>
+    <span class="variable">esp.BoxOutline.Thickness</span> = <span class="number">3</span>
+    <span class="variable">esp.BoxOutline.Color</span> = <span class="variable">Color3.new</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)
+    <span class="variable">esp.Box.Thickness</span> = <span class="number">1</span>
+    <span class="variable">esp.Box.Color</span> = <span class="variable">Color3.new</span>(<span class="number">0</span>, <span class="number">1</span>, <span class="number">0.25</span>)
+    <span class="variable">esp.Box.Fill</span> = <span class="keyword">false</span>
+    
+    <span class="comment">-- Name tag styling</span>
+    <span class="variable">esp.NameTag.Size</span> = <span class="number">16</span>
+    <span class="variable">esp.NameTag.Center</span> = <span class="keyword">true</span>
+    <span class="variable">esp.NameTag.Outline</span> = <span class="keyword">true</span>
+    <span class="variable">esp.NameTag.Color</span> = <span class="variable">Color3.new</span>(<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>)
+    
+    <span class="comment">-- Health bar styling</span>
+    <span class="variable">esp.HealthBar.Fill</span> = <span class="keyword">true</span>
+    <span class="variable">esp.HealthBarOutline.Fill</span> = <span class="keyword">false</span>
+    <span class="variable">esp.HealthBarOutline.Color</span> = <span class="variable">Color3.new</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)
+    <span class="variable">esp.HealthBarOutline.Thickness</span> = <span class="number">1</span>
+    
+    <span class="variable">ESPObjects</span>[<span class="variable">player</span>] = <span class="variable">esp</span>
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function">UpdateESP</span>()
+    <span class="keyword">for</span> <span class="variable">player</span>, <span class="variable">esp</span> <span class="keyword">in</span> <span class="function">pairs</span>(<span class="variable">ESPObjects</span>) <span class="keyword">do</span>
+        <span class="keyword">if</span> <span class="variable">player.Character</span> <span class="keyword">and</span> <span class="variable">player.Character:FindFirstChild</span>(<span class="string">"HumanoidRootPart"</span>) <span class="keyword">then</span>
+            <span class="keyword">local</span> <span class="variable">hrp</span> = <span class="variable">player.Character.HumanoidRootPart</span>
+            <span class="keyword">local</span> <span class="variable">distance</span> = (<span class="variable">LocalPlayer.Character.HumanoidRootPart.Position</span> - <span class="variable">hrp.Position</span>).<span class="variable">Magnitude</span>
+            
+            <span class="keyword">if</span> <span class="variable">distance</span> <= <span class="variable">ESPSettings.MaxDistance</span> <span class="keyword">then</span>
+                <span class="keyword">local</span> <span class="variable">vector</span>, <span class="variable">onScreen</span> = <span class="variable">Camera:WorldToViewportPoint</span>(<span class="variable">hrp.Position</span>)
+                
+                <span class="keyword">if</span> <span class="variable">onScreen</span> <span class="keyword">then</span>
+                    <span class="keyword">local</span> <span class="variable">headPos</span> = <span class="variable">Camera:WorldToViewportPoint</span>(<span class="variable">hrp.Position</span> + <span class="variable">Vector3.new</span>(<span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>))
+                    <span class="keyword">local</span> <span class="variable">legPos</span> = <span class="variable">Camera:WorldToViewportPoint</span>(<span class="variable">hrp.Position</span> - <span class="variable">Vector3.new</span>(<span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>))
+                    
+                    <span class="keyword">local</span> <span class="variable">height</span> = <span class="function">math.abs</span>(<span class="variable">headPos.Y</span> - <span class="variable">legPos.Y</span>)
+                    <span class="keyword">local</span> <span class="variable">width</span> = <span class="variable">height</span> * <span class="number">0.6</span>
+                    
+                    <span class="comment">-- Update box</span>
+                    <span class="variable">esp.Box.Size</span> = <span class="variable">Vector2.new</span>(<span class="variable">width</span>, <span class="variable">height</span>)
+                    <span class="variable">esp.Box.Position</span> = <span class="variable">Vector2.new</span>(<span class="variable">vector.X</span> - <span class="variable">width</span>/<span class="number">2</span>, <span class="variable">vector.Y</span> - <span class="variable">height</span>/<span class="number">2</span>)
+                    <span class="variable">esp.Box.Visible</span> = <span class="variable">ESPSettings.Enabled</span>
+                    
+                    <span class="comment">-- Health bar</span>
+                    <span class="keyword">local</span> <span class="variable">health</span> = <span class="variable">player.Character.Humanoid.Health</span>
+                    <span class="keyword">local</span> <span class="variable">maxHealth</span> = <span class="variable">player.Character.Humanoid.MaxHealth</span>
+                    <span class="variable">esp.HealthBar.Size</span> = <span class="variable">Vector2.new</span>(<span class="number">4</span>, <span class="variable">height</span> * (<span class="variable">health</span>/<span class="variable">maxHealth</span>))
+                    <span class="variable">esp.HealthBar.Position</span> = <span class="variable">Vector2.new</span>(<span class="variable">esp.Box.Position.X</span> - <span class="number">8</span>, <span class="variable">esp.Box.Position.Y</span> + <span class="variable">height</span> - (<span class="variable">height</span> * (<span class="variable">health</span>/<span class="variable">maxHealth</span>)))
+                    <span class="variable">esp.HealthBar.Color</span> = <span class="variable">Color3.new</span>(<span class="number">1</span> - (<span class="variable">health</span>/<span class="variable">maxHealth</span>), <span class="variable">health</span>/<span class="variable">maxHealth</span>, <span class="number">0</span>)
+                    <span class="variable">esp.HealthBar.Visible</span> = <span class="variable">ESPSettings.ShowHealth</span>
+                    
+                    <span class="comment">-- Name tag</span>
+                    <span class="variable">esp.NameTag.Position</span> = <span class="variable">Vector2.new</span>(<span class="variable">vector.X</span>, <span class="variable">vector.Y</span> - <span class="variable">height</span>/<span class="number">2</span> - <span class="number">20</span>)
+                    <span class="variable">esp.NameTag.Text</span> = <span class="variable">player.Name</span>
+                    <span class="variable">esp.NameTag.Visible</span> = <span class="variable">ESPSettings.ShowNames</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">-- Initialize ESP for existing players</span>
+<span class="keyword">for</span> <span class="variable">i</span>, <span class="variable">player</span> <span class="keyword">in</span> <span class="function">pairs</span>(<span class="variable">Players:GetPlayers</span>()) <span class="keyword">do</span>
+    <span class="keyword">if</span> <span class="variable">player</span> ~= <span class="variable">LocalPlayer</span> <span class="keyword">then</span>
+        <span class="function">CreateESP</span>(<span class="variable">player</span>)
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="variable">RunService.Heartbeat:Connect</span>(<span class="function">UpdateESP</span>)
+                    </div>
+                </div>
+
+                <div class="script-card">
+                    <h3 class="script-title">⚡ Speed Hack (Smooth)</h3>
+                    <p class="script-description">Advanced speed modification with anti-cheat bypass and smooth acceleration curves.</p>
+                    <div class="code-block">
+<span class="keyword">local</span> <span class="variable">Players</span> = <span class="function">game:GetService</span>(<span class="string">"Players"</span>)
+<span class="keyword">local</span> <span class="variable">RunService</span> = <span class="function">game:GetService</span>(<span class="string">"RunService"</span>)
+<span class="keyword">local</span> <span class="variable">TweenService</span> = <span class="function">game:GetService</span>(<span class="string">"TweenService"</span>)
+<span class="keyword">local</span> <span class="variable">LocalPlayer</span> = <span class="variable">Players.LocalPlayer</span>
+
+<span class="keyword">local</span> <span class="variable">SpeedSettings</span> = {
+    <span class="variable">Enabled</span> = <span class="keyword">true</span>,
+    <span class="variable">Speed</span> = <span class="number">50</span>,
+    <span class="variable">OriginalSpeed</span> = <span class="number">16</span>,
+    <span class="variable">SmoothTransition</span> = <span class="keyword">true</span>,
+    <span class="variable">TransitionTime</span> = <span class="number">0.5</span>
+}
+
+<span class="keyword">local</span> <span class="variable">BodyVelocity</span> = <span class="keyword">nil</span>
+<span class="keyword">local</span> <span class="variable">LastPosition</span> = <span class="keyword">nil</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function">CreateBodyVelocity</span>(<span class="variable">character</span>)
+    <span class="keyword">if</span> <span class="variable">character</span> <span class="keyword">and</span> <span class="variable">character:FindFirstChild</span>(<span class="string">"HumanoidRootPart"</span>) <span class="keyword">then</span>
+        <span class="keyword">local</span> <span class="variable">hrp</span> = <span class="variable">character.HumanoidRootPart</span>
+        
+        <span class="keyword">if</span> <span class="variable">BodyVelocity</span> <span class="keyword">then</span>
+            <span class="variable">BodyVelocity:Destroy</span>()
+        <span class="keyword">end</span>
+        
+        <span class="variable">BodyVelocity</span> = <span class="function">Instance.new</span>(<span class="string">"BodyVelocity"</span>)
+        <span class="variable">BodyVelocity.MaxForce</span> = <span class="variable">Vector3.new</span>(<span class="number">4000</span>, <span class="number">0</span>, <span class="number">4000</span>)
+        <span class="variable">BodyVelocity.Velocity</span> = <span class="variable">Vector3.new</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)
+        <span class="variable">BodyVelocity.Parent</span> = <span class="variable">hrp</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function">UpdateSpeed</span>()
+    <span class="keyword">if</span> <span class="variable">LocalPlayer.Character</span> <span class="keyword">and</span> <span class="variable">LocalPlayer.Character:FindFirstChild</span>(<span class="string">"Humanoid"</span>) <span class="keyword">then</span>
+        <span class="keyword">local</span> <span class="variable">humanoid</span> = <span class="variable">LocalPlayer.Character.Humanoid</span>
+        <span class="keyword">local</span> <span class="variable">hrp</span> = <span class="variable">LocalPlayer.Character.HumanoidRootPart</span>
+        
+        <span class="keyword">if</span> <span class="variable">SpeedSettings.Enabled</span> <span class="keyword">then</span>
+            <span class="keyword">local</span> <span class="variable">moveVector</span> = <span class="variable">humanoid.MoveDirection</span>
+            <span class="keyword">local</span> <span class="variable">lookDirection</span> = <span class="variable">hrp.CFrame.LookVector</span>
+            <span class="keyword">local</span> <span class="variable">rightDirection</span> = <span class="variable">hrp.CFrame.RightVector</span>
+            
+            <span class="keyword">local</span> <span class="variable">targetVelocity</span> = <span class="variable">Vector3.new</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)
+            
+            <span class="keyword">if</span> <span class="variable">moveVector.Magnitude</span> > <span class="number">0</span> <span class="keyword">then</span>
+                <span class="variable">targetVelocity</span> = (<span class="variable">lookDirection</span> * <span class="variable">moveVector.Z</span> + <span class="variable">rightDirection</span> * <span class="variable">moveVector.X</span>) * <span class="variable">SpeedSettings.Speed</span>
+            <span class="keyword">end</span>
+            
+            <span class="keyword">if</span> <span class="variable">BodyVelocity</span> <span class="keyword">then</span>
+                <span class="variable">BodyVelocity.Velocity</span> = <span class="variable">Vector3.new</span>(<span class="variable">targetVelocity.X</span>, <span class="variable">BodyVelocity.Velocity.Y</span>, <span class="variable">targetVelocity.Z</span>)
+            <span class="keyword">end</span>
+        <span class="keyword">else</span>
+            <span class="keyword">if</span> <span class="variable">BodyVelocity</span> <span class="keyword">then</span>
+                <span class="variable">BodyVelocity.Velocity</span> = <span class="variable">Vector3.new</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function">OnCharacterAdded</span>(<span class="variable">character</span>)
+    <span class="function">wait</span>(<span class="number">0.5</span>)
+    <span class="function">CreateBodyVelocity</span>(<span class="variable">character</span>)
+<span class="keyword">end</span>
+
+<span class="variable">LocalPlayer.CharacterAdded:Connect</span>(<span class="function">OnCharacterAdded</span>)
+<span class="variable">RunService.Heartbeat:Connect</span>(<span class="function">UpdateSpeed</span>)
+
+<span class="keyword">if</span> <span class="variable">LocalPlayer.Character</span> <span class="keyword">then</span>
+    <span class="function">OnCharacterAdded</span>(<span class="variable">LocalPlayer.Character</span>)
+<span class="keyword">end</span>
+                    </div>
+                </div>
+
+                <div class="script-card">
+                    <h3 class="script-title">🔮 Universal GUI Framework</h3>
+                    <p class="script-description">Professional GUI system with animations, themes, and cross-game compatibility.</p>
+                    <div class="code-block">
+<span class="keyword">local</span> <span class="variable">TweenService</span> = <span class="function">game:GetService</span>(<span class="string">"TweenService"</span>)
+<span class="keyword">local</span> <span class="variable">UserInputService</span> = <span class="function">game:GetService</span>(<span class="string">"UserInputService"</span>)
+<span class="keyword">local</span> <span class="variable">Players</span> = <span class="function">game:GetService</span>(<span class="string">"Players"</span>)
+
+<span class="keyword">local</span> <span class="variable">GUI</span> = {}
+<span class="variable">GUI.__index</span> = <span class="variable">GUI</span>
+
+<span class="keyword">function</span> <span class="function">GUI.new</span>(<span class="variable">title</span>)
+    <span class="keyword">local</span> <span class="variable">self</span> = <span class="function">setmetatable</span>({}, <span class="variable">GUI</span>)
+    
+    <span class="comment">-- Create ScreenGui</span>
+    <span class="variable">self.ScreenGui</span> = <span class="function">Instance.new</span>(<span class="string">"ScreenGui"</span>)
+    <span class="variable">self.ScreenGui.Name</span> = <span class="string">"ARP_GUI"</span>
+    <span class="variable">self.ScreenGui.ResetOnSpawn</span> = <span class="keyword">false</span>
+    <span class="variable">self.ScreenGui.Parent</span> = <span class="variable">Players.LocalPlayer:WaitForChild</span>(<span class="string">"PlayerGui"</span>)
+    
+    <span class="comment">-- Main Frame</span>
+    <span class="variable">self.MainFrame</span> = <span class="function">Instance.new</span>(<span class="string">"Frame"</span>)
+    <span class="variable">self.MainFrame.Name</span> = <span class="string">"MainFrame"</span>
+    <span class="variable">self.MainFrame.Size</span> = <span class="variable">UDim2.new</span>(<span class="number">0</span>, <span class="number">400</span>, <span class="number">0</span>, <span class="number">500</span>)
+    <span class="variable">self.MainFrame.Position</span> = <span class="variable">UDim2.new</span>(<span class="number">0.5</span>, <span class="number">-200</span>, <span class="number">0.5</span>, <span class="number">-250</span>)
+    <span class="variable">self.MainFrame.BackgroundColor3</span> = <span class="variable">Color3.fromRGB</span>(<span class="number">25</span>, <span class="number">25</span>, <span class="number">35</span>)
+    <span class="variable">self.MainFrame.BorderSizePixel</span> = <span class="number">0</span>
+    <span class="variable">self.MainFrame.Active</span> = <span class="keyword">true</span>
+    <span class="variable">self.MainFrame.Draggable</span> = <span class="keyword">true</span>
+    <span class="variable">self.MainFrame.Parent</span> = <span class="variable">self.ScreenGui</span>
+    
+    <span class="comment">-- Corner Radius</span>
+    <span class="keyword">local</span> <span class="variable">corner</span> = <span class="function">Instance.new</span>(<span class="string">"UICorner"</span>)
+    <span class="variable">corner.CornerRadius</span> = <span class="variable">UDim.new</span>(<span class="number">0</span>, <span class="number">10</span>)
+    <span class="variable">corner.Parent</span> = <span class="variable">self.MainFrame</span>
+    
+    <span class="comment">-- Title Bar</span>
+    <span class="variable">self.TitleBar</span> = <span class="function">Instance.new</span>(<span class="string">"Frame"</span>)
+    <span class="variable">self.TitleBar.Name</span> = <span class="string">"TitleBar"</span>
+    <span class="variable">self.TitleBar.Size</span> = <span class="variable">UDim2.new</span>(<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">40</span>)
+    <span class="variable">self.TitleBar.BackgroundColor3</span> = <span class="variable">Color3.fromRGB</span>(<span class="number">0</span>, <span class="number">255</span>, <span class="number">65</span>)
+    <span class="variable">self.TitleBar.BorderSizePixel</span> = <span class="number">0</span>
+    <span class="variable">self.TitleBar.Parent</span> = <span class="variable">self.MainFrame</span>
+    
+    <span class="comment">-- Title Text</span>
+    <span class="variable">self.TitleText</span> = <span class="function">Instance.new</span>(<span class="string">"TextLabel"</span>)
+    <span class="variable">self.TitleText.Name</span> = <span class="string">"TitleText"</span>
+    <span class="variable">self.TitleText.Size</span> = <span class="variable">UDim2.new</span>(<span class="number">1</span>, <span class="number">-80</span>, <span class="number">1</span>, <span class="number">0</span>)
+    <span class="variable">self.TitleText.Position</span> = <span class="variable">UDim2.new</span>(<span class="number">0</span>, <span class="number">10</span>, <span class="number">0</span>, <span class="number">0</span>)
+    <span class="variable">self.TitleText.BackgroundTransparency</span> = <span class="number">1</span>
+    <span class="variable">self.TitleText.Text</span> = <span class="variable">title</span> <span class="keyword">or</span> <span class="string">"ARP's Script Hub"</span>
+    <span class="variable">self.TitleText.TextColor3</span> = <span class="variable">Color3.fromRGB</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)
+    <span class="variable">self.TitleText.TextScaled</span> = <span class="keyword">true</span>
+    <span class="variable">self.TitleText.Font</span> = <span class="variable">Enum.Font.GothamBold</span>
+    <span class="variable">self.TitleText.Parent</span> = <span class="variable">self.TitleBar</span>
+    
+    <span class="comment">-- Close Button</span>
+    <span class="variable">self.CloseButton</span> = <span class="function">Instance.new</span>(<span class="string">"TextButton"</span>)
+    <span class="variable">self.CloseButton.Name</span> = <span class="string">"CloseButton"</span>
+    <span class="variable">self.CloseButton.Size</span> = <span class="variable">UDim2.new</span>(<span class="number">0</span>, <span class="number">30</span>, <span class="number">0</span>, <span class="number">30</span>)
+    <span class="variable">self.CloseButton.Position</span> = <span class="variable">UDim2.new</span>(<span class="number">1</span>, <span class="number">-35</span>, <span class="number">0</span>, <span class="number">5</span>)
+    <span class="variable">self.CloseButton.BackgroundColor3</span> = <span class="variable">Color3.fromRGB</span>(<span class="number">255</span>, <span class="number">0</span>, <span class="number">0</span>)
+    <span class="variable">self.CloseButton.Text</span> = <span class="string">"X"</span>
+    <span class="variable">self.CloseButton.TextColor3</span> = <span class="variable">Color3.fromRGB</span>(<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>)
+    <span class="variable">self.CloseButton.Font</span> = <span class="variable">Enum.Font.GothamBold</span>
+    <span class="variable">self.CloseButton.BorderSizePixel</span> = <span class="number">0</span>
+    <span class="variable">self.CloseButton.Parent</span> = <span class="variable">self.TitleBar</span>
+    
+    <span class="comment">-- Content Frame</span>
+    <span class="variable">self.ContentFrame</span> = <span class="function">Instance.new</span>(<span class="string">"Frame"</span>)
+    <span class="variable">self.ContentFrame.Name</span> = <span class="string">"ContentFrame"</span>
+    <span class="variable">self.ContentFrame.Size</span> = <span class="variable">UDim2.new</span>(<span class="number">1</span>, <span class="number">-20</span>, <span class="number">1</span>, <span class="number">-60</span>)
+    <span class="variable">self.ContentFrame.Position</span> = <span class="variable">UDim2.new</span>(<span class="number">0</span>, <span class="number">10</span>, <span class="number">0</span>, <span class="number">50</span>)
+    <span class="variable">self.ContentFrame.BackgroundTransparency</span> = <span class="number">1</span>
+    <span class="variable">self.ContentFrame.Parent</span> = <span class="variable">self.MainFrame</span>
+    
+    <span class="comment">-- Setup Events</span>
+    <span class="variable">self.CloseButton.MouseButton1Click:Connect</span>(<span class="keyword">function</span>()
+        <span class="variable">self:Destroy</span>()
+    <span class="keyword">end</span>)
+    
+    <span class="keyword">return</span> <span class="variable">self</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> <span class="function">GUI:AddButton</span>(<span class="variable">text</span>, <span class="variable">callback</span>)
+    <span class="keyword">local</span> <span class="variable">button</span> = <span class="function">Instance.new</span>(<span class="string">"TextButton"</span>)
+    <span class="variable">button.Name</span> = <span class="variable">text</span>
+    <span class="variable">button.Size</span> = <span class="variable">UDim2.new</span>(<span class="number">1</span>, <span class="number">-20</span>, <span class="number">0</span>, <span class="number">35</span>)
+    <span class="variable">button.BackgroundColor3</span> = <span class="variable">Color3.fromRGB</span>(<span class="number">45</span>, <span class="number">45</span>, <span class="number">55</span>)
+    <span class="variable">button.Text</span> = <span class="variable">text</span>
+    <span class="variable">button.TextColor3</span> = <span class="variable">Color3.fromRGB</span>(<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>)
+    <span class="variable">button.Font</span> = <span class="variable">Enum.Font.Gotham</span>
+    <span class="variable">button.BorderSizePixel</span> = <span class="number">0</span>
+    <span class="variable">button.Parent</span> = <span class="variable">self.ContentFrame</span>
+    
+    <span class="variable">button.MouseButton1Click:Connect</span>(<span class="variable">callback</span>)
+    
+    <span class="keyword">return</span> <span class="variable">button</span>
+<span class="keyword">end</span>
+
+<span class="comment">-- Usage Example</span>
+<span class="keyword">local</span> <span class="variable">gui</span> = <span class="function">GUI.new</span>(<span class="string">"ARP's Premium Scripts"</span>)
+<span class="variable">gui:AddButton</span>(<span class="string">"Enable Aimbot"</span>, <span class="keyword">function</span>()
+    <span class="function">print</span>(<span class="string">"Aimbot Enabled!"</span>)
+<span class="keyword">end</span>)
+                    </div>
+                </div>
+
+                <div class="script-card">
+                    <h3 class="script-title">🚁 Advanced Fly System</h3>
+                    <p class="script-description">Professional fly script with velocity control, smooth movement, and anti-detection.</p>
+                    <div class="code-block">
+<span class="keyword">local</span> <span class="variable">Players</span> = <span class="function">game:GetService</span>(<span class="string">"Players"</span>)
+<span class="keyword">local</span> <span class="variable">RunService</span> = <span class="function">game:GetService</span>(<span class="string">"RunService"</span>)
+<span class="keyword">local</span> <span class="variable">UserInputService</span> = <span class="function">game:GetService</span>(<span class="string">"UserInputService"</span>)
+<span class="keyword">local</span> <span class="variable">LocalPlayer</span> = <span class="variable">Players.LocalPlayer</span>
+
+<span class="keyword">local</span> <span class="variable">FlySettings</span> = {
+    <span class="variable">Enabled</span> = <span class="keyword">false</span>,
+    <span class="variable">Speed</span> = <span class="number">50</span>,
+    <span class="variable">MaxSpeed</span> = <span class="number">100</span>,
+    <span class="variable">Acceleration</span> = <span class="number">2</span>,
+    <span class="variable">ToggleKey</span> = <span class="variable">Enum.KeyCode.F</span>
+}
+
+<span class="keyword">local</span> <span class="variable">BodyVelocity</span> = <span class="keyword">nil</span>
+<span class="keyword">local</span> <span class="variable">BodyAngularVelocity</span> = <span class="keyword">nil</span>
+<span class="keyword">local</span> <span class="variable">Flying</span> = <span class="keyword">false</span>
+<span class="keyword">local</span> <span class="variable">CurrentVelocity</span> = <span class="variable">Vector3.new</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)
+
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function">CreateFlyObjects</span>(<span class="variable">character</span>)
+    <span class="keyword">if</span> <span class="variable">character</span> <span class="keyword">and</span> <span class="variable">character:FindFirstChild</span>(<span class="string">"HumanoidRootPart"</span>) <span class="keyword">then</span>
+        <span class="keyword">local</span> <span class="variable">hrp</span> = <span class="variable">character.HumanoidRootPart</span>
+        
+        <span class="comment">-- Clean up existing objects</span>
+        <span class="keyword">if</span> <span class="variable">BodyVelocity</span> <span class="keyword">then</span> <span class="variable">BodyVelocity:Destroy</span>() <span class="keyword">end</span>
+        <span class="keyword">if</span> <span class="variable">BodyAngularVelocity</span> <span class="keyword">then</span> <span class="variable">BodyAngularVelocity:Destroy</span>() <span class="keyword">end</span>
+        
+        <span class="comment">-- Create new objects</span>
+        <span class="variable">BodyVelocity</span> = <span class="function">Instance.new</span>(<span class="string">"BodyVelocity"</span>)
+        <span class="variable">BodyVelocity.MaxForce</span> = <span class="variable">Vector3.new</span>(<span class="number">9e9</span>, <span class="number">9e9</span>, <span class="number">9e9</span>)
+        <span class="variable">BodyVelocity.Velocity</span> = <span class="variable">Vector3.new</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)
+        <span class="variable">BodyVelocity.Parent</span> = <span class="variable">hrp</span>
+        
+        <span class="variable">BodyAngularVelocity</span> = <span class="function">Instance.new</span>(<span class="string">"BodyAngularVelocity"</span>)
+        <span class="variable">BodyAngularVelocity.MaxTorque</span> = <span class="variable">Vector3.new</span>(<span class="number">9e9</span>, <span class="number">9e9</span>, <span class="number">9e9</span>)
+        <span class="variable">BodyAngularVelocity.AngularVelocity</span> = <span class="variable">Vector3.new</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)
+        <span class="variable">BodyAngularVelocity.Parent</span> = <span class="variable">hrp</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function">ToggleFly</span>()
+    <span class="variable">Flying</span> = <span class="keyword">not</span> <span class="variable">Flying</span>
+    
+    <span class="keyword">if</span> <span class="variable">Flying</span> <span class="keyword">then</span>
+        <span class="keyword">if</span> <span class="variable">LocalPlayer.Character</span> <span class="keyword">then</span>
+            <span class="function">CreateFlyObjects</span>(<span class="variable">LocalPlayer.Character</span>)
+            <span class="function">print</span>(<span class="string">"Flight Enabled"</span>)
+        <span class="keyword">end</span>
+    <span class="keyword">else</span>
+        <span class="keyword">if</span> <span class="variable">BodyVelocity</span> <span class="keyword">then</span> <span class="variable">BodyVelocity:Destroy</span>() <span class="keyword">end</span>
+        <span class="keyword">if</span> <span class="variable">BodyAngularVelocity</span> <span class="keyword">then</span> <span class="variable">BodyAngularVelocity:Destroy</span>() <span class="keyword">end</span>
+        <span class="variable">CurrentVelocity</span> = <span class="variable">Vector3.new</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)
+        <span class="function">print</span>(<span class="string">"Flight Disabled"</span>)
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function">UpdateFly</span>()
+    <span class="keyword">if</span> <span class="variable">Flying</span> <span class="keyword">and</span> <span class="variable">LocalPlayer.Character</span> <span class="keyword">and</span> <span class="variable">LocalPlayer.Character:FindFirstChild</span>(<span class="string">"HumanoidRootPart"</span>) <span class="keyword">then</span>
+        <span class="keyword">local</span> <span class="variable">hrp</span> = <span class="variable">LocalPlayer.Character.HumanoidRootPart</span>
+        <span class="keyword">local</span> <span class="variable">camera</span> = <span class="variable">workspace.CurrentCamera</span>
+        <span class="keyword">local</span> <span class="variable">moveVector</span> = <span class="variable">Vector3.new</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)
+        
+        <span class="comment">-- Get input directions</span>
+        <span class="keyword">if</span> <span class="variable">UserInputService:IsKeyDown</span>(<span class="variable">Enum.KeyCode.W</span>) <span class="keyword">then</span>
+            <span class="variable">moveVector</span> = <span class="variable">moveVector</span> + <span class="variable">camera.CFrame.LookVector</span>
+        <span class="keyword">end</span>
+        <span class="keyword">if</span> <span class="variable">UserInputService:IsKeyDown</span>(<span class="variable">Enum.KeyCode.S</span>) <span class="keyword">then</span>
+            <span class="variable">moveVector</span> = <span class="variable">moveVector</span> - <span class="variable">camera.CFrame.LookVector</span>
+        <span class="keyword">end</span>
+        <span class="keyword">if</span> <span class="variable">UserInputService:IsKeyDown</span>(<span class="variable">Enum.KeyCode.A</span>) <span class="keyword">then</span>
+            <span class="variable">moveVector</span> = <span class="variable">moveVector</span> - <span class="variable">camera.CFrame.RightVector
