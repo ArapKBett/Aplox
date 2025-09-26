@@ -1,0 +1,32 @@
+{
+  "name": "arps-roblox-scripter-portfolio",
+  "version": "1.0.0",
+  "description": "Roblox Scripter",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 3000",
+    "build": "echo 'No build process required - static HTML/CSS/JS'",
+    "dev": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "roblox",
+    "scripting",
+    "lua",
+    "exploits",
+    "portfolio",
+    "game-development",
+    "anti-cheat",
+    "aimbot",
+    "esp",
+    "roblox-scripts"
+  ],
+  "author": "ARP's Professional Scripts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/arps-roblox-portfolio.git"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
