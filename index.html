@@ -799,4 +799,374 @@
             <span class="variable">moveVector</span> = <span class="variable">moveVector</span> - <span class="variable">camera.CFrame.LookVector</span>
         <span class="keyword">end</span>
         <span class="keyword">if</span> <span class="variable">UserInputService:IsKeyDown</span>(<span class="variable">Enum.KeyCode.A</span>) <span class="keyword">then</span>
-            <span class="variable">moveVector</span> = <span class="variable">moveVector</span> - <span class="variable">camera.CFrame.RightVector
+            <span class="variable">moveVector</span> = <span class="variable">moveVector</span> - <span class="variable">camera.CFrame.RightVector<span class="keyword">end</span>
+        <span class="keyword">if</span> <span class="variable">UserInputService:IsKeyDown</span>(<span class="variable">Enum.KeyCode.D</span>) <span class="keyword">then</span>
+            <span class="variable">moveVector</span> = <span class="variable">moveVector</span> + <span class="variable">camera.CFrame.RightVector</span>
+        <span class="keyword">end</span>
+        <span class="keyword">if</span> <span class="variable">UserInputService:IsKeyDown</span>(<span class="variable">Enum.KeyCode.Space</span>) <span class="keyword">then</span>
+            <span class="variable">moveVector</span> = <span class="variable">moveVector</span> + <span class="variable">Vector3.new</span>(<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>)
+        <span class="keyword">end</span>
+        <span class="keyword">if</span> <span class="variable">UserInputService:IsKeyDown</span>(<span class="variable">Enum.KeyCode.LeftShift</span>) <span class="keyword">then</span>
+            <span class="variable">moveVector</span> = <span class="variable">moveVector</span> + <span class="variable">Vector3.new</span>(<span class="number">0</span>, <span class="number">-1</span>, <span class="number">0</span>)
+        <span class="keyword">end</span>
+        
+        <span class="comment">-- Normalize and apply speed</span>
+        <span class="keyword">if</span> <span class="variable">moveVector.Magnitude</span> > <span class="number">0</span> <span class="keyword">then</span>
+            <span class="variable">moveVector</span> = <span class="variable">moveVector.Unit</span> * <span class="variable">FlySettings.Speed</span>
+        <span class="keyword">end</span>
+        
+        <span class="comment">-- Smooth acceleration</span>
+        <span class="variable">CurrentVelocity</span> = <span class="variable">CurrentVelocity:lerp</span>(<span class="variable">moveVector</span>, <span class="variable">FlySettings.Acceleration</span> * <span class="variable">RunService.Heartbeat:Wait</span>())
+        
+        <span class="keyword">if</span> <span class="variable">BodyVelocity</span> <span class="keyword">then</span>
+            <span class="variable">BodyVelocity.Velocity</span> = <span class="variable">CurrentVelocity</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">-- Event Connections</span>
+<span class="variable">UserInputService.InputBegan:Connect</span>(<span class="keyword">function</span>(<span class="variable">input</span>)
+    <span class="keyword">if</span> <span class="variable">input.KeyCode</span> == <span class="variable">FlySettings.ToggleKey</span> <span class="keyword">then</span>
+        <span class="function">ToggleFly</span>()
+    <span class="keyword">end</span>
+<span class="keyword">end</span>)
+
+<span class="variable">RunService.Heartbeat:Connect</span>(<span class="function">UpdateFly</span>)
+
+<span class="variable">LocalPlayer.CharacterAdded:Connect</span>(<span class="keyword">function</span>(<span class="variable">character</span>)
+    <span class="keyword">if</span> <span class="variable">Flying</span> <span class="keyword">then</span>
+        <span class="function">wait</span>(<span class="number">0.5</span>)
+        <span class="function">CreateFlyObjects</span>(<span class="variable">character</span>)
+    <span class="keyword">end</span>
+<span class="keyword">end</span>)
+                    </div>
+                </div>
+
+                <div class="script-card">
+                    <h3 class="script-title">🎯 Silent Aim System</h3>
+                    <p class="script-description">Invisible aimbot that redirects bullets without moving camera - undetectable by most anti-cheats.</p>
+                    <div class="code-block">
+<span class="keyword">local</span> <span class="variable">Players</span> = <span class="function">game:GetService</span>(<span class="string">"Players"</span>)
+<span class="keyword">local</span> <span class="variable">RunService</span> = <span class="function">game:GetService</span>(<span class="string">"RunService"</span>)
+<span class="keyword">local</span> <span class="variable">UserInputService</span> = <span class="function">game:GetService</span>(<span class="string">"UserInputService"</span>)
+<span class="keyword">local</span> <span class="variable">Camera</span> = <span class="variable">workspace.CurrentCamera</span>
+<span class="keyword">local</span> <span class="variable">LocalPlayer</span> = <span class="variable">Players.LocalPlayer</span>
+
+<span class="keyword">local</span> <span class="variable">SilentAimSettings</span> = {
+    <span class="variable">Enabled</span> = <span class="keyword">true</span>,
+    <span class="variable">FOV</span> = <span class="number">90</span>,
+    <span class="variable">TargetPart</span> = <span class="string">"Head"</span>,
+    <span class="variable">Prediction</span> = <span class="number">0.13</span>,
+    <span class="variable">WallCheck</span> = <span class="keyword">true</span>,
+    <span class="variable">VisibleCheck</span> = <span class="keyword">true</span>
+}
+
+<span class="keyword">local</span> <span class="variable">Target</span> = <span class="keyword">nil</span>
+<span class="keyword">local</span> <span class="variable">OldNamecall</span> = <span class="keyword">nil</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function">GetClosestPlayer</span>()
+    <span class="keyword">local</span> <span class="variable">ClosestPlayer</span> = <span class="keyword">nil</span>
+    <span class="keyword">local</span> <span class="variable">ShortestDistance</span> = <span class="variable">math.huge</span>
+    
+    <span class="keyword">for</span> <span class="variable">i</span>, <span class="variable">Player</span> <span class="keyword">in</span> <span class="function">pairs</span>(<span class="variable">Players:GetPlayers</span>()) <span class="keyword">do</span>
+        <span class="keyword">if</span> <span class="variable">Player</span> ~= <span class="variable">LocalPlayer</span> <span class="keyword">and</span> <span class="variable">Player.Character</span> <span class="keyword">and</span> <span class="variable">Player.Character:FindFirstChild</span>(<span class="variable">SilentAimSettings.TargetPart</span>) <span class="keyword">then</span>
+            <span class="keyword">local</span> <span class="variable">TargetPosition</span> = <span class="variable">Player.Character</span>[<span class="variable">SilentAimSettings.TargetPart</span>].<span class="variable">Position</span>
+            <span class="keyword">local</span> <span class="variable">ScreenPosition</span> = <span class="variable">Camera:WorldToViewportPoint</span>(<span class="variable">TargetPosition</span>)
+            <span class="keyword">local</span> <span class="variable">Distance</span> = (<span class="variable">Vector2.new</span>(<span class="variable">ScreenPosition.X</span>, <span class="variable">ScreenPosition.Y</span>) - <span class="variable">Vector2.new</span>(<span class="variable">Camera.ViewportSize.X</span>/<span class="number">2</span>, <span class="variable">Camera.ViewportSize.Y</span>/<span class="number">2</span>)).<span class="variable">Magnitude</span>
+            
+            <span class="keyword">if</span> <span class="variable">Distance</span> < <span class="variable">SilentAimSettings.FOV</span> <span class="keyword">and</span> <span class="variable">Distance</span> < <span class="variable">ShortestDistance</span> <span class="keyword">then</span>
+                <span class="keyword">if</span> <span class="variable">SilentAimSettings.WallCheck</span> <span class="keyword">then</span>
+                    <span class="keyword">local</span> <span class="variable">Ray</span> = <span class="function">Ray.new</span>(<span class="variable">Camera.CFrame.Position</span>, (<span class="variable">TargetPosition</span> - <span class="variable">Camera.CFrame.Position</span>).<span class="variable">Unit</span> * <span class="number">1000</span>)
+                    <span class="keyword">local</span> <span class="variable">Hit</span> = <span class="variable">workspace:FindPartOnRay</span>(<span class="variable">Ray</span>, <span class="variable">LocalPlayer.Character</span>)
+                    
+                    <span class="keyword">if</span> <span class="variable">Hit</span> <span class="keyword">and</span> <span class="variable">Hit.Parent</span> == <span class="variable">Player.Character</span> <span class="keyword">then</span>
+                        <span class="variable">ClosestPlayer</span> = <span class="variable">Player</span>
+                        <span class="variable">ShortestDistance</span> = <span class="variable">Distance</span>
+                    <span class="keyword">end</span>
+                <span class="keyword">else</span>
+                    <span class="variable">ClosestPlayer</span> = <span class="variable">Player</span>
+                    <span class="variable">ShortestDistance</span> = <span class="variable">Distance</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    
+    <span class="keyword">return</span> <span class="variable">ClosestPlayer</span>
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function">PredictPosition</span>(<span class="variable">player</span>)
+    <span class="keyword">if</span> <span class="variable">player.Character</span> <span class="keyword">and</span> <span class="variable">player.Character:FindFirstChild</span>(<span class="string">"HumanoidRootPart"</span>) <span class="keyword">then</span>
+        <span class="keyword">local</span> <span class="variable">velocity</span> = <span class="variable">player.Character.HumanoidRootPart.Velocity</span>
+        <span class="keyword">local</span> <span class="variable">position</span> = <span class="variable">player.Character</span>[<span class="variable">SilentAimSettings.TargetPart</span>].<span class="variable">Position</span>
+        <span class="keyword">return</span> <span class="variable">position</span> + (<span class="variable">velocity</span> * <span class="variable">SilentAimSettings.Prediction</span>)
+    <span class="keyword">end</span>
+    <span class="keyword">return</span> <span class="keyword">nil</span>
+<span class="keyword">end</span>
+
+<span class="comment">-- Hook into game functions</span>
+<span class="variable">OldNamecall</span> = <span class="function">getrawmetatable</span>(<span class="variable">game</span>).__namecall
+<span class="function">setreadonly</span>(<span class="function">getrawmetatable</span>(<span class="variable">game</span>), <span class="keyword">false</span>)
+<span class="function">getrawmetatable</span>(<span class="variable">game</span>).__namecall = <span class="function">newcclosure</span>(<span class="keyword">function</span>(<span class="variable">self</span>, ...)
+    <span class="keyword">local</span> <span class="variable">args</span> = {...}
+    <span class="keyword">local</span> <span class="variable">method</span> = <span class="function">getnamecallmethod</span>()
+    
+    <span class="keyword">if</span> <span class="variable">SilentAimSettings.Enabled</span> <span class="keyword">and</span> <span class="variable">method</span> == <span class="string">"FireServer"</span> <span class="keyword">and</span> <span class="variable">Target</span> <span class="keyword">then</span>
+        <span class="keyword">local</span> <span class="variable">PredictedPosition</span> = <span class="function">PredictPosition</span>(<span class="variable">Target</span>)
+        <span class="keyword">if</span> <span class="variable">PredictedPosition</span> <span class="keyword">then</span>
+            <span class="comment">-- Modify arguments to redirect to target</span>
+            <span class="keyword">if</span> <span class="variable">args</span>[<span class="number">1</span>] <span class="keyword">and</span> <span class="function">typeof</span>(<span class="variable">args</span>[<span class="number">1</span>]) == <span class="string">"Vector3"</span> <span class="keyword">then</span>
+                <span class="variable">args</span>[<span class="number">1</span>] = <span class="variable">PredictedPosition</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    
+    <span class="keyword">return</span> <span class="variable">OldNamecall</span>(<span class="variable">self</span>, <span class="function">unpack</span>(<span class="variable">args</span>))
+<span class="keyword">end</span>)
+
+<span class="comment">-- Update target continuously</span>
+<span class="variable">RunService.Heartbeat:Connect</span>(<span class="keyword">function</span>()
+    <span class="keyword">if</span> <span class="variable">SilentAimSettings.Enabled</span> <span class="keyword">then</span>
+        <span class="variable">Target</span> = <span class="function">GetClosestPlayer</span>()
+    <span class="keyword">end</span>
+<span class="keyword">end</span>)
+                    </div>
+                </div>
+
+                <div class="script-card">
+                    <h3 class="script-title">🌍 Universal Teleport System</h3>
+                    <p class="script-description">Advanced teleportation with waypoints, safe landing, and cross-map navigation.</p>
+                    <div class="code-block">
+<span class="keyword">local</span> <span class="variable">Players</span> = <span class="function">game:GetService</span>(<span class="string">"Players"</span>)
+<span class="keyword">local</span> <span class="variable">TweenService</span> = <span class="function">game:GetService</span>(<span class="string">"TweenService"</span>)
+<span class="keyword">local</span> <span class="variable">RunService</span> = <span class="function">game:GetService</span>(<span class="string">"RunService"</span>)
+<span class="keyword">local</span> <span class="variable">LocalPlayer</span> = <span class="variable">Players.LocalPlayer</span>
+
+<span class="keyword">local</span> <span class="variable">TeleportSystem</span> = {}
+<span class="variable">TeleportSystem.Waypoints</span> = {}
+<span class="variable">TeleportSystem.Settings</span> = {
+    <span class="variable">TweenSpeed</span> = <span class="number">2</span>,
+    <span class="variable">SafeLanding</span> = <span class="keyword">true</span>,
+    <span class="variable">BypassAntiCheat</span> = <span class="keyword">true</span>
+}
+
+<span class="keyword">function</span> <span class="function">TeleportSystem:TeleportTo</span>(<span class="variable">position</span>, <span class="variable">instant</span>)
+    <span class="keyword">if</span> <span class="keyword">not</span> <span class="variable">LocalPlayer.Character</span> <span class="keyword">or</span> <span class="keyword">not</span> <span class="variable">LocalPlayer.Character:FindFirstChild</span>(<span class="string">"HumanoidRootPart"</span>) <span class="keyword">then</span>
+        <span class="keyword">return</span> <span class="keyword">false</span>
+    <span class="keyword">end</span>
+    
+    <span class="keyword">local</span> <span class="variable">hrp</span> = <span class="variable">LocalPlayer.Character.HumanoidRootPart</span>
+    <span class="keyword">local</span> <span class="variable">targetPosition</span> = <span class="variable">position</span>
+    
+    <span class="comment">-- Safe landing check</span>
+    <span class="keyword">if</span> <span class="variable">self.Settings.SafeLanding</span> <span class="keyword">then</span>
+        <span class="keyword">local</span> <span class="variable">ray</span> = <span class="variable">workspace:Raycast</span>(<span class="variable">targetPosition</span>, <span class="variable">Vector3.new</span>(<span class="number">0</span>, <span class="number">-1000</span>, <span class="number">0</span>))
+        <span class="keyword">if</span> <span class="variable">ray</span> <span class="keyword">then</span>
+            <span class="variable">targetPosition</span> = <span class="variable">ray.Position</span> + <span class="variable">Vector3.new</span>(<span class="number">0</span>, <span class="number">5</span>, <span class="number">0</span>)
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    
+    <span class="keyword">if</span> <span class="variable">instant</span> <span class="keyword">then</span>
+        <span class="comment">-- Instant teleport</span>
+        <span class="variable">hrp.CFrame</span> = <span class="variable">CFrame.new</span>(<span class="variable">targetPosition</span>)
+    <span class="keyword">else</span>
+        <span class="comment">-- Smooth teleport</span>
+        <span class="keyword">local</span> <span class="variable">tweenInfo</span> = <span class="variable">TweenInfo.new</span>(
+            <span class="variable">self.Settings.TweenSpeed</span>,
+            <span class="variable">Enum.EasingStyle.Sine</span>,
+            <span class="variable">Enum.EasingDirection.InOut</span>
+        )
+        
+        <span class="keyword">local</span> <span class="variable">tween</span> = <span class="variable">TweenService:Create</span>(<span class="variable">hrp</span>, <span class="variable">tweenInfo</span>, {
+            <span class="variable">CFrame</span> = <span class="variable">CFrame.new</span>(<span class="variable">targetPosition</span>)
+        })
+        
+        <span class="variable">tween:Play</span>()
+    <span class="keyword">end</span>
+    
+    <span class="keyword">return</span> <span class="keyword">true</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> <span class="function">TeleportSystem:SaveWaypoint</span>(<span class="variable">name</span>)
+    <span class="keyword">if</span> <span class="variable">LocalPlayer.Character</span> <span class="keyword">and</span> <span class="variable">LocalPlayer.Character:FindFirstChild</span>(<span class="string">"HumanoidRootPart"</span>) <span class="keyword">then</span>
+        <span class="variable">self.Waypoints</span>[<span class="variable">name</span>] = <span class="variable">LocalPlayer.Character.HumanoidRootPart.Position</span>
+        <span class="keyword">return</span> <span class="keyword">true</span>
+    <span class="keyword">end</span>
+    <span class="keyword">return</span> <span class="keyword">false</span>
+<span class="keyword">end</span>
+
+<span class="comment">-- Usage examples</span>
+<span class="variable">TeleportSystem:SaveWaypoint</span>(<span class="string">"Spawn"</span>)
+<span class="variable">TeleportSystem:TeleportTo</span>(<span class="variable">Vector3.new</span>(<span class="number">100</span>, <span class="number">50</span>, <span class="number">100</span>))
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="contact-section" id="contact">
+            <h2 class="section-title">Ready to Hire Elite Talent?</h2>
+            <p>Professional Roblox scripter with 5+ years of experience delivering world-class exploits and game modifications.</p>
+            <p>Specialized in advanced anti-cheat bypasses, custom GUI frameworks, and high-performance script optimization.</p>
+            <button class="contact-button">💼 Hire Me Now</button>
+            <button class="contact-button">📧 Request Portfolio</button>
+            <button class="contact-button">💬 Discuss Project</button>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-brand">ARP's</div>
+        <p>&copy; 2024 ARP's Professional Scripts. Elite Roblox Development Services.</p>
+        <p>Trusted by 100+ clients worldwide | 500+ scripts delivered | 24/7 support</p>
+    </footer>
+
+    <script>
+        // Matrix background effect
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()";
+        const matrixArray = matrix.split("");
+
+        const fontSize = 10;
+        const columns = canvas.width / fontSize;
+
+        const drops = [];
+        for(let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00ff41';
+            ctx.font = fontSize + 'px monospace';
+
+            for(let i = 0; i < drops.length; i++) {
+                const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 35);
+
+        // Floating code animation
+        const codeSnippets = [
+            "game:GetService('Players')",
+            "local Players = game:GetService('Players')",
+            "workspace.CurrentCamera",
+            "LocalPlayer.Character",
+            "RunService.Heartbeat:Connect",
+            "UserInputService.InputBegan",
+            "TweenService:Create",
+            "Vector3.new(0, 0, 0)",
+            "CFrame.new(position)",
+            "humanoid.WalkSpeed = 50",
+            "bodyVelocity.Velocity",
+            "Camera:WorldToViewportPoint",
+            "math.rad(90)",
+            "string.lower(self.Name)",
+            "Instance.new('RemoteEvent')",
+            "game.PlaceId",
+            "tick()",
+            "wait(0.5)",
+            "pairs(Players:GetPlayers())",
+            "Character:FindFirstChild"
+        ];
+
+        function createFloatingCode() {
+            const code = document.createElement('div');
+            code.className = 'floating-code';
+            code.textContent = codeSnippets[Math.floor(Math.random() * codeSnippets.length)];
+            code.style.left = Math.random() * window.innerWidth + 'px';
+            code.style.animationDuration = (Math.random() * 10 + 15) + 's';
+            code.style.animationName = 'float';
+            
+            document.body.appendChild(code);
+            
+            setTimeout(() => {
+                if (code.parentNode) {
+                    code.parentNode.removeChild(code);
+                }
+            }, 25000);
+        }
+
+        // Create floating code every 2 seconds
+        setInterval(createFloatingCode, 2000);
+
+        // Create initial floating codes
+        for (let i = 0; i < 5; i++) {
+            setTimeout(createFloatingCode, i * 400);
+        }
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Resize canvas on window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Add interactive effects to script cards
+        document.querySelectorAll('.script-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Animate stats on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const statNumbers = entry.target.querySelectorAll('.stat-number');
+                    statNumbers.forEach(stat => {
+                        const finalNumber = stat.textContent;
+                        stat.textContent = '0';
+                        
+                        const increment = parseInt(finalNumber.replace(/[^0-9]/g, '')) / 50;
+                        let current = 0;
+                        
+                        const timer = setInterval(() => {
+                            current += increment;
+                            if (current >= parseInt(finalNumber.replace(/[^0-9]/g, ''))) {
+                                stat.textContent = finalNumber;
+                                clearInterval(timer);
+                            } else {
+                                stat.textContent = Math.floor(current) + (finalNumber.includes('+') ? '+' : '');
+                            }
+                        }, 30);
+                    });
+                }
+            });
+        });
+
+        const statsSection = document.querySelector('.stats');
+        if (statsSection) {
+            observer.observe(statsSection);
+        }
+    </script>
+</body>
+</html>
